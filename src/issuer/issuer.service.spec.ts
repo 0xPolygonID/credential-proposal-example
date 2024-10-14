@@ -1,8 +1,8 @@
-import { IssuerNodeService, SupportedCredential } from "./issuer.service";
-import { Test } from "@nestjs/testing";
-import { ConfigModule } from "@nestjs/config";
+import { IssuerNodeService, SupportedCredential } from './issuer.service';
+import { Test } from '@nestjs/testing';
+import { ConfigModule } from '@nestjs/config';
 
-describe("IssuerNodeService", () => {
+describe('IssuerNodeService', () => {
   let issuerNodeService: IssuerNodeService;
 
   beforeEach(async () => {
@@ -18,19 +18,20 @@ describe("IssuerNodeService", () => {
     issuerNodeService = moduleRef.get<IssuerNodeService>(IssuerNodeService);
   });
 
-  it("should create a credential", async () => {
+  it('should create a credential', async () => {
     const credentialRequest = {
       credentialSchema: SupportedCredential.JsonSchema,
       type: SupportedCredential.Type,
       credentialSubject: {
-        id: "did:iden3:privado:main:2Sfns6mQYkPS9gArHEZSXYbpxfWEjvfMsE1LUK4ZLA",
+        id: 'did:iden3:privado:main:2Sfns6mQYkPS9gArHEZSXYbpxfWEjvfMsE1LUK4ZLA',
         human: true,
       },
       expiration: 1234567890,
     };
 
-    const response =
-      await issuerNodeService.createCredential(credentialRequest);
+    const response = await issuerNodeService.createCredential(
+      credentialRequest,
+    );
     expect(response).toBeDefined();
   });
 });

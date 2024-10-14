@@ -1,13 +1,13 @@
 export enum Status {
-  APPROVED = "APPROVED",
-  REJECTED = "REJECTED",
-  PENDING_VERIFICATION = "PENDING_VERIFICATION",
-  SUBMISSION_REQUIRED = "SUBMISSION_REQUIRED",
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  PENDING_VERIFICATION = 'PENDING_VERIFICATION',
+  SUBMISSION_REQUIRED = 'SUBMISSION_REQUIRED',
 }
 
 export enum ClientType {
-  MOBILE = "MOBILE",
-  WEB = "WEB",
+  Iden3MobileServiceV1 = 'Iden3MobileServiceV1',
+  Iden3WebRedirectV1 = 'Iden3WebRedirectV1',
 }
 
 export interface Session {

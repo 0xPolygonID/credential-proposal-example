@@ -1,29 +1,28 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable } from '@nestjs/common';
 import {
   ProposalRequestMessage,
   ProposalMessageBody,
   CredentialsOfferMessageBody,
   CredentialOfferStatus,
-  JsonDocumentObject,
-  JsonDocumentObjectValue,
   ProtocolMessage,
   PROTOCOL_CONSTANTS,
   BasicMessage,
-} from "@0xpolygonid/js-sdk";
+  DIDDocument,
+} from '@0xpolygonid/js-sdk';
 import {
   StorageService,
   Session,
   ClientType,
-} from "src/storage/storage.service";
-import { Status } from "src/storage/storage.service";
-import { SynapsService } from "src/synaps/synaps.service";
-import { v4 as uuidv4 } from "uuid";
-import { ConfigService } from "@nestjs/config";
+} from 'src/storage/storage.service';
+import { Status } from 'src/storage/storage.service';
+import { SynapsService } from 'src/synaps/synaps.service';
+import { v4 as uuidv4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
 
 import {
   IssuerNodeService,
   SupportedCredential,
-} from "src/issuer/issuer.service";
+} from 'src/issuer/issuer.service';
 
 @Injectable()
 export class AgentService {
@@ -36,10 +35,10 @@ export class AgentService {
     private configService: ConfigService,
   ) {
     this._agentUrl = this.configService
-      .get<string>("AGENT_URL", {
+      .get<string>('AGENT_URL', {
         infer: true,
       })
-      .replace(/\/$/, "");
+      .replace(/\/$/, '');
   }
   async handleCredentialProposalRequest(
     proposalRequest: ProposalRequestMessage,
@@ -55,7 +54,7 @@ export class AgentService {
         externalSessionId: newSession.session_id,
         thid: proposalRequest.thid,
         status: Status.SUBMISSION_REQUIRED,
-        credentialId: "",
+        credentialId: '',
         // we need to define client type
         // because frontend logic for mobile and web is different
         // we are working to unify it
@@ -89,17 +88,19 @@ export class AgentService {
     return this._processExistingSession(session);
   }
 
-  private _clientType(didDoc: JsonDocumentObject): ClientType {
+  private _clientType(didDoc: DIDDocument): ClientType {
     if (didDoc?.service === undefined) {
-      return ClientType.WEB;
+      return ClientType.Iden3WebRedirectV1;
     }
-    const services = didDoc.service as JsonDocumentObjectValue[];
-    for (const service of services) {
-      if (service["type"] === "Iden3MobileServiceV1") {
-        return ClientType.MOBILE;
+    for (const service of didDoc.service) {
+      switch (service['type']) {
+        case 'Iden3MobileServiceV1':
+          return ClientType.Iden3MobileServiceV1;
+        case 'Iden3WebRedirectV1':
+          return ClientType.Iden3WebRedirectV1;
       }
     }
-    return ClientType.WEB;
+    return ClientType.Iden3WebRedirectV1;
   }
 
   private async _processExistingSession(
@@ -141,7 +142,7 @@ export class AgentService {
           session.did,
         );
       case Status.APPROVED:
-        if (session.credentialId !== "") {
+        if (session.credentialId !== '') {
           return this._getBasicMessage(
             PROTOCOL_CONSTANTS.PROTOCOL_MESSAGE_TYPE
               .CREDENTIAL_OFFER_MESSAGE_TYPE,
@@ -169,6 +170,9 @@ export class AgentService {
             return Math.floor(expirationDate.getTime() / 1000); // Convert to seconds
           })(),
         });
+        if (response.id === undefined) {
+          throw new Error(`Credential creation failed ${response}`);
+        }
         session = {
           ...session,
           credentialId: response.id,
@@ -212,7 +216,7 @@ export class AgentService {
       credentials: [
         {
           id: id,
-          description: "Proof of liveness",
+          description: 'Proof of liveness',
           status: status,
         },
       ],
@@ -251,9 +255,9 @@ export class AgentService {
               context: SupportedCredential.JsonLDSchema,
             },
           ],
-          type: "SynapsCredentialProposal",
+          type: 'SynapsCredentialProposal',
           url: `${url}/index.html?session=${sessionId}&did=${did}&clientType=${clientType}`,
-          description: "Synaps credential proposal",
+          description: 'Synaps credential proposal',
         },
       ],
     };

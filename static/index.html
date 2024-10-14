@@ -36,7 +36,7 @@
         const credentials = message.body.credentials;
         if (credentials && credentials[0] && credentials[0].status === "pending") {
           // Mobile applicaton can process credentials in the background
-          if (clientType === "MOBILE") {
+          if (clientType === "Iden3MobileServiceV1") {
             callParentHandler(message);
           } else {
           setTimeout(fetchCredentialOffer, timeout)

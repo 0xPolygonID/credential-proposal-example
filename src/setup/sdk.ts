@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { proving } from "@iden3/js-jwz";
+import { proving } from '@iden3/js-jwz';
 import {
   defaultEthConnectionConfig,
   EthStateStorage,
@@ -16,9 +16,9 @@ import {
   CircuitId,
   PlainPacker,
   IPacker,
-} from "@0xpolygonid/js-sdk";
+} from '@0xpolygonid/js-sdk';
 // import { path } from 'path';
-import * as path from "path";
+import * as path from 'path';
 
 export interface JsSdk {
   packageMgr: IPackageManager;
@@ -57,22 +57,24 @@ const getPackageMgr = async (
 export const setupSdk = async ({
   rpcUrl,
   contractAddress,
-  env = "production",
+  env = 'production',
 }: {
   rpcUrl: string;
   contractAddress: string;
   env?: string;
 }) => {
-  const conf: EthConnectionConfig = {
-    ...defaultEthConnectionConfig,
-    url: rpcUrl,
-    contractAddress,
-    chainId: 21000,
-  };
+  const conf: EthConnectionConfig[] = [
+    {
+      ...defaultEthConnectionConfig,
+      url: rpcUrl,
+      contractAddress,
+      chainId: 21000,
+    },
+  ];
   const states = new EthStateStorage(conf);
 
   const circuitStorage = new FSCircuitStorage({
-    dirname: path.join(process.cwd(), "circuits"),
+    dirname: path.join(process.cwd(), 'circuits'),
   });
 
   const proofService = new ProofService(
@@ -89,7 +91,7 @@ export const setupSdk = async ({
   // You can use PlainTextPacker in development mode
   // to pass plain text messages to the agent endpoint
   // but in production you should use only ZKPPacker or JWSPacker
-  if (env === "development") {
+  if (env === 'development') {
     packers.push(new PlainPacker());
   }
   packageMgr.registerPackers(packers);

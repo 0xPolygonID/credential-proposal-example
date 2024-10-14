@@ -7,25 +7,25 @@ import {
   Query,
   Header,
   HttpCode,
-} from "@nestjs/common";
-import { JsSdk } from "../setup/sdk";
-import { AgentService } from "./agent.service";
+} from '@nestjs/common';
+import { JsSdk } from '../setup/sdk';
+import { AgentService } from './agent.service';
 import {
   PROTOCOL_CONSTANTS,
   ProposalRequestMessage,
   CredentialFetchRequestMessage,
   BasicMessage,
-} from "@0xpolygonid/js-sdk";
+} from '@0xpolygonid/js-sdk';
 import {
   IssuerNodeService,
   SupportedCredential,
-} from "src/issuer/issuer.service";
+} from 'src/issuer/issuer.service';
 
 @Controller()
 export class AgentController {
   constructor(
-    @Inject("SDK") private readonly _sdk: JsSdk,
-    @Inject(AgentService) private readonly _agnetService: AgentService,
+    @Inject('SDK') private readonly _sdk: JsSdk,
+    @Inject(AgentService) private readonly _agentService: AgentService,
     @Inject(IssuerNodeService)
     private readonly _issuerService: IssuerNodeService,
   ) {}
@@ -75,8 +75,8 @@ export class AgentController {
     }
   }
 
-  @Post("agent")
-  @Header("Content-Type", "application/json")
+  @Post('agent')
+  @Header('Content-Type', 'application/json')
   @HttpCode(200)
   async agent(@Body() token: string): Promise<string> {
     const { unpackedMessage } = await this._sdk.packageMgr.unpack(
@@ -91,17 +91,16 @@ export class AgentController {
         .PROPOSAL_REQUEST_MESSAGE_TYPE:
         const proposalRequest = unpackedMessage as ProposalRequestMessage;
         this._validateProposalRequestMessage(proposalRequest);
-        basicMessage =
-          await this._agnetService.handleCredentialProposalRequest(
-            proposalRequest,
-          );
+        basicMessage = await this._agentService.handleCredentialProposalRequest(
+          proposalRequest,
+        );
         return JSON.stringify(basicMessage);
 
       case PROTOCOL_CONSTANTS.PROTOCOL_MESSAGE_TYPE
         .CREDENTIAL_FETCH_REQUEST_MESSAGE_TYPE:
         const credentialFetchRequest =
           unpackedMessage as CredentialFetchRequestMessage;
-        basicMessage = await this._agnetService.credentialOfferExchange(
+        basicMessage = await this._agentService.credentialOfferExchange(
           credentialFetchRequest.body.id,
         );
         return JSON.stringify(basicMessage);
@@ -111,11 +110,11 @@ export class AgentController {
     }
   }
 
-  @Get("offers")
-  @Header("Content-Type", "application/json")
+  @Get('offers')
+  @Header('Content-Type', 'application/json')
   @HttpCode(200)
   async offers(@Query() query: { sessionID: string }): Promise<string> {
-    const basicMessage = await this._agnetService.credentialOfferExchange(
+    const basicMessage = await this._agentService.credentialOfferExchange(
       query.sessionID,
     );
     return JSON.stringify(basicMessage);

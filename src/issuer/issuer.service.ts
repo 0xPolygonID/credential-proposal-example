@@ -1,13 +1,13 @@
-import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 export const SupportedCredential = {
   JsonLDSchema:
-    "https://raw.githubusercontent.com/anima-protocol/claims-polygonid/main/schemas/json-ld/pol-v1.json-ld",
+    'https://raw.githubusercontent.com/anima-protocol/claims-polygonid/main/schemas/json-ld/pol-v1.json-ld',
   JsonSchema:
-    "https://raw.githubusercontent.com/anima-protocol/claims-polygonid/main/schemas/json/PoLAnima-v1.json",
-  Type: "AnimaProofOfLife",
-  Description: "Proof of liveness",
+    'https://raw.githubusercontent.com/anima-protocol/claims-polygonid/main/schemas/json/PoLAnima-v1.json',
+  Type: 'AnimaProofOfLife',
+  Description: 'Proof of liveness',
 } as const;
 
 export interface ICreateCredentialRequest {
@@ -35,17 +35,17 @@ export class IssuerNodeService {
 
   constructor(private configService: ConfigService) {
     this._url = this.configService
-      .get<string>("ISSUER_API_AGENT_URL", {
+      .get<string>('ISSUER_API_AGENT_URL', {
         infer: true,
       })
-      .replace(/\/$/, "");
-    this._issuerDid = this.configService.get<string>("ISSUER_DID", {
+      .replace(/\/$/, '');
+    this._issuerDid = this.configService.get<string>('ISSUER_DID', {
       infer: true,
     });
-    this._username = this.configService.get<string>("ISSUER_API_USER_NAME", {
+    this._username = this.configService.get<string>('ISSUER_API_USER_NAME', {
       infer: true,
     });
-    this._password = this.configService.get<string>("ISSUER_API_PASSWORD", {
+    this._password = this.configService.get<string>('ISSUER_API_PASSWORD', {
       infer: true,
     });
   }
@@ -59,9 +59,9 @@ export class IssuerNodeService {
     const response = await fetch(
       `${this._url}/v2/identities/${this._issuerDid}/credentials`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Basic ${encodedCredentials}`,
         },
         body: JSON.stringify(credentialRequest),
