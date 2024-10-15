@@ -16,12 +16,19 @@ import {
   CircuitId,
   PlainPacker,
   IPacker,
+  ProvingParams,
 } from '@0xpolygonid/js-sdk';
 // import { path } from 'path';
 import * as path from 'path';
 
 export interface JsSdk {
   packageMgr: IPackageManager;
+}
+
+class ProofServiceVerifyOnly extends ProofService {
+  constructor(circuitStorage: FSCircuitStorage, states: EthStateStorage) {
+    super(null, null, circuitStorage, states);
+  }
 }
 
 const getPackageMgr = async (
@@ -48,7 +55,8 @@ const getPackageMgr = async (
   ]);
 
   const mgr: IPackageManager = new PackageManager();
-  const packer = new ZKPPacker({} as any, verificationParamMap);
+  const paramsMap = new Map<string, ProvingParams>();
+  const packer = new ZKPPacker(paramsMap, verificationParamMap);
   mgr.registerPackers([packer]);
 
   return mgr;
@@ -77,12 +85,7 @@ export const setupSdk = async ({
     dirname: path.join(process.cwd(), 'circuits'),
   });
 
-  const proofService = new ProofService(
-    {} as any,
-    {} as any,
-    circuitStorage,
-    states,
-  );
+  const proofService = new ProofServiceVerifyOnly(circuitStorage, states);
   const packageMgr = await getPackageMgr(
     await circuitStorage.loadCircuitData(CircuitId.AuthV2),
     proofService.verifyState.bind(proofService),

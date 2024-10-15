@@ -39,7 +39,7 @@
           if (clientType === "Iden3MobileServiceV1") {
             callParentHandler(message);
           } else {
-          setTimeout(fetchCredentialOffer, timeout)
+            setTimeout(fetchCredentialOffer, timeout)
           }
         } else {
           callParentHandler(message);
@@ -55,7 +55,7 @@
       sessionId: session,
       onFinish: async () => {
         try {
-          setTimeout(fetchCredentialOffer, timeout)
+          fetchCredentialOffer();
         } catch (e) {
           callParentHandler({
             type: "https://didcomm.org/report-problem/2.0/problem-report",
