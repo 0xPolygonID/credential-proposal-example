@@ -3,7 +3,6 @@ import {
   Post,
   Get,
   Inject,
-  Body,
   Query,
   Header,
   HttpCode,
@@ -20,6 +19,7 @@ import {
   IssuerNodeService,
   SupportedCredential,
 } from 'src/issuer/issuer.service';
+import { RawPayload } from 'src/common/raw-payload.decorator';
 
 @Controller()
 export class AgentController {
@@ -78,15 +78,33 @@ export class AgentController {
   @Post('agent')
   @Header('Content-Type', 'application/json')
   @HttpCode(200)
-  async agent(@Body() token: string): Promise<string> {
-    const { unpackedMessage } = await this._sdk.packageMgr.unpack(
-      new TextEncoder().encode(token),
-    );
+  async agent(@RawPayload() payload: Uint8Array): Promise<string> {
+    const result = await this._sdk.packageMgr.unpack(payload);
+    const { unpackedMessage, unpackedMediaType } = result;
 
-    this._validateBasicMessage(unpackedMessage);
+    // support playin text packer only for disclosure protocol messages
+    // other messages must use jwz packer
+    if (
+      unpackedMediaType == PROTOCOL_CONSTANTS.MediaType.PlainMessage &&
+      unpackedMessage.type !==
+        PROTOCOL_CONSTANTS.PROTOCOL_MESSAGE_TYPE
+          .DISCOVERY_PROTOCOL_QUERIES_MESSAGE_TYPE
+    ) {
+      throw new Error(
+        `Invalid media type: '${unpackedMediaType}' is not supported for message type '${unpackedMessage.type}'`,
+      );
+    }
 
     let basicMessage: BasicMessage;
     switch (unpackedMessage.type) {
+      case PROTOCOL_CONSTANTS.PROTOCOL_MESSAGE_TYPE
+        .DISCOVERY_PROTOCOL_QUERIES_MESSAGE_TYPE:
+        basicMessage = await this._sdk.discoveryProtocolHandler.handle(
+          unpackedMessage,
+          {},
+        );
+        return JSON.stringify(basicMessage);
+
       case PROTOCOL_CONSTANTS.PROTOCOL_MESSAGE_TYPE
         .PROPOSAL_REQUEST_MESSAGE_TYPE:
         const proposalRequest = unpackedMessage as ProposalRequestMessage;
